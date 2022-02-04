@@ -16,7 +16,7 @@ function App() {
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ title: 'React POST Request Example' }),
 			};
-			let resp = await fetch('https://reqres.in/api/posts', requestOptions);
+			let resp = await fetch('http://localhost:3001/questions', requestOptions);
 			if (resp.ok) {
 				resp = await resp.json();
 				setFormSubmitted(true);
@@ -29,11 +29,32 @@ function App() {
 		}
 	};
 
-  const handleOptionSelect = () => {
-
-  }
-
 	const currentQuestion = questions[currentQuestionIndex];
+
+	const handleOptionSelect = async (e) => {
+		const { value } = e.target;
+		const { answerIndex, options } = currentQuestion;
+		try {
+			const requestOptions = {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					question: currentQuestion,
+					selectedAnswer: value,
+				}),
+			};
+			let resp = await fetch('http://localhost:3001/answers', requestOptions);
+			resp = await resp.json();
+			if (options[answerIndex] == value) {
+				alert('Correct Answer!!!');
+			} else {
+				setCurrentQuestionIndex((currentIndex) => currentIndex + 1);
+			}
+			console.log('respp2==>>', resp);
+		} catch (err) {
+			console.log('an error occured', err);
+		}
+	};
 
 	return (
 		<div className="Project-header">
@@ -44,7 +65,12 @@ function App() {
 						<h1>Answers:</h1>
 						{currentQuestion.options.map((option, i) => (
 							<div>
-								<input type="radio" onChange={handleOptionSelect} value={option} name={`question${i}`} />{' '}
+								<input
+									type="radio"
+									onChange={handleOptionSelect}
+									value={option}
+									name={`question${i}`}
+								/>{' '}
 								{option}
 							</div>
 						))}
