@@ -7,6 +7,7 @@ function App() {
 	const [apiCallFailed, setApiCallFailed] = useState(false);
 	const [formSubmitted, setFormSubmitted] = useState(false);
 	const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+	const [selectedAnswers, setSelectedAnswers] = useState({});
 
 	const handleFormSubmit = async (e) => {
 		e.preventDefault();
@@ -16,7 +17,7 @@ function App() {
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ title: 'React POST Request Example' }),
 			};
-			let resp = await fetch('http://localhost:3001/questions', requestOptions);
+			let resp = await fetch('https://reqres.in/api/posts', requestOptions);
 			if (resp.ok) {
 				resp = await resp.json();
 				setFormSubmitted(true);
@@ -33,6 +34,10 @@ function App() {
 
 	const handleOptionSelect = async (e) => {
 		const { value } = e.target;
+		setSelectedAnswers((prevState) => ({
+			...prevState,
+			[currentQuestionIndex]: value,
+		}));
 		const { answerIndex, options } = currentQuestion;
 		try {
 			const requestOptions = {
@@ -48,7 +53,9 @@ function App() {
 			if (options[answerIndex] == value) {
 				alert('Correct Answer!!!');
 			} else {
+				alert('Wrong Answer, try again!!!');
 				setCurrentQuestionIndex((currentIndex) => currentIndex + 1);
+				setSelectedAnswers({});
 			}
 			console.log('respp2==>>', resp);
 		} catch (err) {
@@ -59,7 +66,7 @@ function App() {
 	return (
 		<div className="Project-header">
 			{formSubmitted ? (
-				currentQuestion && (
+				currentQuestion ? (
 					<div>
 						<p>Question: {currentQuestion.question} =</p>
 						<h1>Answers:</h1>
@@ -70,11 +77,14 @@ function App() {
 									onChange={handleOptionSelect}
 									value={option}
 									name={`question${i}`}
+									checked={selectedAnswers[i] === option}
 								/>{' '}
 								{option}
 							</div>
 						))}
 					</div>
+				) : (
+					<h1>You have exceeded maximum limit of attempts</h1>
 				)
 			) : (
 				<div>
